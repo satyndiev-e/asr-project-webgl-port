@@ -5,15 +5,14 @@
 
 let gl = null;
 
-
 /**
  * Shader Data
  */
+
 let shaderProgram = null;
 let positionAttributeLocation = null;
 let colorAttributeLocation = null;
 let timeUniformLocation = null;
-
 
 /**
  * Geometry Data
@@ -24,12 +23,15 @@ let fragmentShaderObject = null;
 let geometryType = null;
 let vertexCount = null;
 
-
 /**
  * Utility Data
  */
 
 let renderingStartTime = null;
+
+/**
+ * Get a WebGL context
+ */
 
 export function initializeWebGL() {
     const canvas = document.getElementById("webgl-canvas");
@@ -56,7 +58,6 @@ export function getGeometryType() {
         TriangleStrip: gl.TRIANGLE_STRIP,
     };
 }
-
 
 /**
  * Shader Program Handling
@@ -99,7 +100,6 @@ export function createShader(vertexShader, fragmentShader) {
     timeUniformLocation = gl.getUniformLocation(shaderProgram, "time");
 }
 
-
 /**
  * Geometry Handling 
  */
@@ -121,7 +121,6 @@ export function createGeometry(geometry, data, numberOfVertices) {
     gl.enableVertexAttribArray(colorAttributeLocation);
     gl.vertexAttribPointer(colorAttributeLocation, 4, type, normalize, stride, Float32Array.BYTES_PER_ELEMENT * 3);
 }
-
 
 /**
  * Rendering
