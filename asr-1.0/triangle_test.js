@@ -1,7 +1,5 @@
 "use strict";
 
-import * as asr from "./asr.js";
-
 const vertexShaderSource = `
     attribute vec4 position;
     attribute vec4 color;
@@ -44,10 +42,14 @@ function main() {
     asr.initializeWebGL();
     asr.createShader(vertexShaderSource, fragmentShaderSource);
     asr.createGeometry(asr.getGeometryType().Triangles, triangleGeometryData, triangleGeometryVertexCount);
-
     asr.prepareForRendering();
-    asr.renderNextFrame();
 
+    function render() {
+        asr.renderNextFrame();
+        requestAnimationFrame(render);
+    }
+    
+    render();
 }
 
 main();

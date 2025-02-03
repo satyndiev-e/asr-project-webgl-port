@@ -1,7 +1,5 @@
 "use strict";
 
-import * as asr from "./asr.js";
-
 const vertexShaderSource = `
     attribute vec4 position;
     attribute vec4 color;
@@ -25,13 +23,13 @@ const fragmentShaderSource = `
     }
 `;
 
-function generateCircleGeometryData (radius, segmentCount) {
+function generateCircleGeometryData(radius, segmentCount) {
     const array = [];
 
     let angle = 0.0;
     const angleDelta = 2.0 * Math.PI / segmentCount;
 
-    for(let i = 0; i < segmentCount; ++i) {
+    for (let i = 0; i < segmentCount; ++i) {
         array.push(0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0);
 
         const x = Math.sin(angle) * radius;
@@ -56,7 +54,13 @@ function main() {
     asr.createGeometry(asr.getGeometryType().Triangles, circleGeometryData, circleGeometryData.length / 7.0);
 
     asr.prepareForRendering();
-    asr.renderNextFrame();
+
+    function render() {
+        asr.renderNextFrame();
+        requestAnimationFrame(render);
+    }
+
+    render();
 }
 
 main();

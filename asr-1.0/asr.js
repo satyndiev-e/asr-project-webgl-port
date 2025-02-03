@@ -30,10 +30,10 @@ let vertexCount = null;
 let renderingStartTime = null;
 
 /**
- * Get a WebGL context
+ * Get WebGL context
  */
 
-export function initializeWebGL() {
+function initializeWebGL() {
     const canvas = document.getElementById("webgl-canvas");
     gl = canvas.getContext("webgl");
 
@@ -47,7 +47,7 @@ export function initializeWebGL() {
  * Geometry Types
  */
 
-export function getGeometryType() {
+function getGeometryType() {
     return {
         Points: gl.POINTS,
         Lines: gl.LINES,
@@ -63,7 +63,7 @@ export function getGeometryType() {
  * Shader Program Handling
  */
 
-export function createShader(vertexShader, fragmentShader) {
+function createShader(vertexShader, fragmentShader) {
     const vertexShaderSource = vertexShader;
     const fragmentShaderSource = fragmentShader;
 
@@ -104,7 +104,7 @@ export function createShader(vertexShader, fragmentShader) {
  * Geometry Handling 
  */
 
-export function createGeometry(geometry, data, numberOfVertices) {
+function createGeometry(geometry, data, numberOfVertices) {
     vertexCount = numberOfVertices;
     geometryType = geometry;
 
@@ -126,16 +126,36 @@ export function createGeometry(geometry, data, numberOfVertices) {
  * Rendering
  */
 
-export function prepareForRendering() {
+function prepareForRendering() {
     gl.clearColor(0, 0, 0, 0);
     renderingStartTime = performance.now();
 }
 
-export function renderNextFrame() {
+function renderNextFrame() {
     const time = (performance.now() - renderingStartTime) / 1000.0;
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(shaderProgram);
     gl.uniform1f(timeUniformLocation, time);
     gl.drawArrays(geometryType, 0, vertexCount);
-    requestAnimationFrame(renderNextFrame);
 }
+
+/**
+ * Exports
+ */
+(function (global) {
+    const asr = {
+        //Functions
+
+        initializeWebGL,
+        createShader,
+        createGeometry,
+        prepareForRendering,
+        renderNextFrame,
+
+        //Objecs
+        getGeometryType
+    };
+
+    global.asr = asr;
+})(window);
+
