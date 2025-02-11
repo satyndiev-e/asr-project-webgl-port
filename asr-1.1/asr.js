@@ -8,16 +8,16 @@ let gl = null;
  * Common Constants
  */
 
-export const PI = Math.PI;
-export const TWO_PI = 2.0 * Math.PI;
-export const HALF_PI = 0.5 * Math.PI;
-export const QUARTER_PI = 0.25 * Math.PI;
+const PI = Math.PI;
+const TWO_PI = 2.0 * Math.PI;
+const HALF_PI = 0.5 * Math.PI;
+const QUARTER_PI = 0.25 * Math.PI;
 
 /* 
  * Geometry Types
  */
 
-export function geometryType() {
+function geometryType() {
     return {
         Points: gl.POINTS,
         Lines: gl.LINES,
@@ -29,21 +29,22 @@ export function geometryType() {
     };
 }
 
-export function vertex (x, y, z, r, g, b, a) {
+function vertex(x, y, z, r, g, b, a) {
     return {
-        x:x, y:y, z:z,
-        r:r, g:g, b:b, a:a
+        x: x, y: y, z: z,
+        r: r, g: g, b: b, a: a
     };
 }
 
 /**
  * Transformation Types
  */
-export function matrixMode() {
+
+function matrixMode() {
     return {
-        Model: 'Model',
-        View: 'View',
-        Projection: 'Projection'
+        Model: 0,
+        View: 1,
+        Projection: 2
     }
 }
 
@@ -77,12 +78,11 @@ let currentMatrixStack = [modelMatrixStack];
 
 let renderingStartTime = null;
 
-
 /**
  * Initialize WebGL
  */
 
-export function initializeWebGL() {
+function initializeWebGL() {
     const canvas = document.getElementById("webgl-canvas");
     gl = canvas.getContext("webgl");
 
@@ -94,10 +94,38 @@ export function initializeWebGL() {
 }
 
 /**
+ * Keyboard Handler
+ */
+
+function setKeysEventHandler() {
+    const keysPressed = {};
+
+    function handleKeyDown(event) {
+        keysPressed[event.key.toLowerCase()] = true;
+    }
+
+    function handleKeyUp(event) {
+        delete keysPressed[event.key.toLowerCase()];
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+
+    return {
+        isKeyPressed: function (key) {
+            return !!keysPressed[key.toLowerCase()];
+        },
+        getPressedKeys: function () {
+            return Object.keys(keysPressed);
+        }
+    };
+}
+
+/**
  * Shader Program Handling
  */
 
-export function createShader(vertexShader, fragmentShader) {
+function createShader(vertexShader, fragmentShader) {
     const vertexShaderSource = vertexShader;
     const fragmentShaderSource = fragmentShader;
 
@@ -139,32 +167,24 @@ export function createShader(vertexShader, fragmentShader) {
  * Geometry Handling
  */
 
-export function createGeometry(type, vertices, indices) {
-
+function createGeometry(type, vertices, indices) {
     const vertexBufferObject = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferObject);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
     const indexBufferObject = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBufferObject);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-
-    let dataType = gl.FLOAT;
-    let normalize = false;
-    let stride = Float32Array.BYTES_PER_ELEMENT * 7;
-
-    gl.enableVertexAttribArray(positionAttributeLocation);
-    gl.vertexAttribPointer(positionAttributeLocation, 3, dataType, normalize, stride, 0);
-    gl.enableVertexAttribArray(colorAttributeLocation);
-    gl.vertexAttribPointer(colorAttributeLocation, 4, dataType, normalize, stride, 3 * Float32Array.BYTES_PER_ELEMENT);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
     return {
         type: type,
         vertexCount: indices.length,
+        vertexBuffer: vertexBufferObject,
+        indexBuffer: indexBufferObject
     };
 }
 
-export function setCurrentGeometry(geometry) {
+function setCurrentGeometry(geometry) {
     currentGeometry = geometry;
 }
 
@@ -172,15 +192,15 @@ export function setCurrentGeometry(geometry) {
  * Transformation
  */
 
-export function setMatrixMode(mode) {
-    switch(mode) {
-        case 'Model':
+function setMatrixMode(mode) {
+    switch (mode) {
+        case matrixMode().Model:
             currentMatrixStack = modelMatrixStack;
             break;
-        case 'View':
+        case matrixMode().View:
             currentMatrixStack = viewMatrixStack;
             break;
-        case 'Projection':
+        case matrixMode().Projection:
             currentMatrixStack = projectionMatrixStack;
             break;
         default:
@@ -190,14 +210,14 @@ export function setMatrixMode(mode) {
     return currentMatrixStack;
 }
 
-export function translateMatrix(translation) {
+function translateMatrix(translation) {
     const currentMatrix = currentMatrixStack[currentMatrixStack.length - 1];
     mat4.translate(currentMatrix, currentMatrix, translation);
     currentMatrixStack.pop();
     currentMatrixStack.push(currentMatrix);
 }
 
-export function rotateMatrix(rotation) {
+function rotateMatrix(rotation) {
     const currentMatrix = currentMatrixStack[currentMatrixStack.length - 1];
 
     mat4.rotate(currentMatrix, currentMatrix, rotation[1], vec3.fromValues(0.0, 1.0, 0.0));
@@ -207,7 +227,7 @@ export function rotateMatrix(rotation) {
     currentMatrixStack.push(currentMatrix);
 }
 
-export function scaleMatrix(scale) {
+function scaleMatrix(scale) {
     const currentMatrix = currentMatrixStack[currentMatrixStack.length - 1];
 
     mat4.scale(currentMatrix, currentMatrix, scale);
@@ -215,39 +235,39 @@ export function scaleMatrix(scale) {
     currentMatrixStack.push(currentMatrix);
 }
 
-export function getMatrix() {
+function getMatrix() {
     return currentMatrixStack[currentMatrixStack.length - 1];
 }
 
-export function getModelMatrix() {
+function getModelMatrix() {
     return modelMatrixStack[modelMatrixStack.length - 1];
 }
 
-export function getViewMatrix() {
+function getViewMatrix() {
     return viewMatrixStack[viewMatrixStack.length - 1];
 }
 
-export function getProjectionMatrix() {
+function getProjectionMatrix() {
     return projectionMatrixStack[projectionMatrixStack.length - 1];
 }
 
-export function setMatrix(matrix) {
+function setMatrix(matrix) {
     currentMatrixStack.pop();
     currentMatrixStack.push(matrix);
 }
 
-export function loadIdentityMatrix() {
+function loadIdentityMatrix() {
     setMatrix(mat4.create());
 }
 
-export function  loadLookAtMatrix(position, target) {
+function loadLookAtMatrix(position, target) {
     const up = [0.0, 1.0, 0.0];
     const lookAtMatrix = mat4.create();
     mat4.lookAt(lookAtMatrix, position, target, up);
     setMatrix(lookAtMatrix);
 }
 
-export function loadOrthographicProjectionMatrix(zoom, nearPlane, farPlane) {
+function loadOrthographicProjectionMatrix(zoom, nearPlane, farPlane) {
     const aspectRatio = gl.canvas.clientWidth / gl.canvas.clientHeight;
 
     const left = -(zoom * aspectRatio);
@@ -260,7 +280,7 @@ export function loadOrthographicProjectionMatrix(zoom, nearPlane, farPlane) {
     setMatrix(orthoMatrix);
 }
 
-export function loadPerspectiveProjectionMatrix(fieldOfView, nearPlane, farPlane) {
+function loadPerspectiveProjectionMatrix(fieldOfView, nearPlane, farPlane) {
     const aspectRatio = gl.canvas.clientWidth / gl.canvas.clientHeight;;
 
     const perspectiveMatrix = mat4.create();
@@ -269,24 +289,24 @@ export function loadPerspectiveProjectionMatrix(fieldOfView, nearPlane, farPlane
     currentMatrixStack.push(perspectiveMatrix);
 }
 
-export function pushMatrix() {
+function pushMatrix() {
     const topMatrix = currentMatrixStack[currentMatrixStack.length - 1];
     currentMatrixStack.push(topMatrix);
 }
 
-export function popMatrix() {
-    if(currentMatrixStack.length === 0) {
+function popMatrix() {
+    if (currentMatrixStack.length === 0) {
         throw new Error("Cannot pop from an empty matrix stack.");
     }
-    if(currentMatrixStack.length > 1) {
+    if (currentMatrixStack.length > 1) {
         currentMatrixStack.pop();
     } else {
         mat4.identity(currentMatrixStack[0]);
     }
 }
 
-export function clearMatrices() {
-    while(currentMatrixStack.length > 0) currentMatrixStack.pop();
+function clearMatrices() {
+    while (currentMatrixStack.length > 0) currentMatrixStack.pop();
     const matrix = mat4.create();
     currentMatrixStack.push(matrix);
 }
@@ -295,58 +315,73 @@ export function clearMatrices() {
  * Rendering
  */
 
-export function setLineWidth(lineWidth) {
+function setLineWidth(lineWidth) {
     gl.lineWidth(lineWidth);
 }
 
-export function enableFaceCulling() {
+function enableFaceCulling() {
     gl.enable(gl.CULL_FACE);
     gl.frontFace(gl.CCW);
     gl.cullFace(gl.BACK);
 }
 
-export function disableFaceCulling() {
+function disableFaceCulling() {
     gl.disable(gl.CULL_FACE);
 }
 
-export function enableDepthTest() {
+function enableDepthTest() {
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LESS);
 }
 
-export function disableDepthTest() {
+function disableDepthTest() {
     gl.disable(gl.DEPTH_TEST);
 }
 
-export function prepareForRendering() {
+function prepareForRendering() {
     gl.clearColor(0, 0, 0, 0);
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
 
-    while(modelMatrixStack.length > 0) modelMatrixStack.pop();
+    while (modelMatrixStack.length > 0) modelMatrixStack.pop();
     modelMatrixStack.push(mat4.create());
 
-    while(viewMatrixStack.length > 0) viewMatrixStack.pop();
+    while (viewMatrixStack.length > 0) viewMatrixStack.pop();
     viewMatrixStack.push(mat4.create());
 
-    while(projectionMatrixStack.length > 0) projectionMatrixStack.pop();
+    while (projectionMatrixStack.length > 0) projectionMatrixStack.pop();
     projectionMatrixStack.push(mat4.create());
     renderingStartTime = performance.now();
 }
 
-export function prepareForRenderingFrame() {
+function prepareForRenderingFrame() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
 
-export function renderCurrentGeometry() {
+function renderCurrentGeometry() {
+    if(currentGeometry === null) {
+        throw new Error("Geometry is not set.");
+    }
+    
     gl.useProgram(shaderProgram);
 
-    if(timeUniformLocation !== null) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, currentGeometry.vertexBuffer);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, currentGeometry.indexBuffer);
+
+    let dataType = gl.FLOAT;
+    let normalize = false;
+    let stride = Float32Array.BYTES_PER_ELEMENT * 7;
+
+    gl.enableVertexAttribArray(positionAttributeLocation);
+    gl.vertexAttribPointer(positionAttributeLocation, 3, dataType, normalize, stride, 0);
+    gl.enableVertexAttribArray(colorAttributeLocation);
+    gl.vertexAttribPointer(colorAttributeLocation, 4, dataType, normalize, stride, 3 * Float32Array.BYTES_PER_ELEMENT);
+
+    if (timeUniformLocation !== null) {
         const time = (performance.now() - renderingStartTime) / 1000.0;
         gl.uniform1f(timeUniformLocation, time);
-        requestAnimationFrame(renderCurrentGeometry);
     }
 
-    if(mvpMatrixUniformLocation !== null) {
+    if (mvpMatrixUniformLocation !== null) {
         const modelMatrix = modelMatrixStack[modelMatrixStack.length - 1];
         const viewMatrix = mat4.create();
         mat4.invert(viewMatrix, viewMatrixStack[viewMatrixStack.length - 1]);
@@ -361,5 +396,61 @@ export function renderCurrentGeometry() {
             modelViewProjectionMatrix
         );
     }
+
     gl.drawElements(currentGeometry.type, currentGeometry.vertexCount, gl.UNSIGNED_SHORT, 0);
 }
+
+/**
+ * Exports
+ */
+
+(function (global) {
+    const asr = {
+        //Functions
+
+        initializeWebGL,
+        setKeysEventHandler,
+        createShader,
+        createGeometry,
+        setCurrentGeometry,
+        setMatrixMode,
+        translateMatrix,
+        rotateMatrix,
+        scaleMatrix,
+        getMatrix,
+        getModelMatrix,
+        getViewMatrix,
+        getProjectionMatrix,
+        setMatrix,
+        loadIdentityMatrix,
+        loadLookAtMatrix,
+        loadOrthographicProjectionMatrix,
+        loadPerspectiveProjectionMatrix,
+        pushMatrix,
+        popMatrix,
+        clearMatrices,
+        setLineWidth,
+        enableDepthTest,
+        enableFaceCulling,
+        disableDepthTest,
+        disableFaceCulling,
+        prepareForRendering,
+        prepareForRenderingFrame,
+        renderCurrentGeometry,
+
+        //Objects
+
+        geometryType,
+        vertex,
+        matrixMode,
+
+        //Variables
+
+        PI,
+        TWO_PI,
+        HALF_PI,
+        QUARTER_PI
+    }
+
+    global.asr = asr;
+})(window);

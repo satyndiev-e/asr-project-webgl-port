@@ -1,7 +1,5 @@
 "use strict";
 
-import * as asr from "./asr.js";
-
 const vertexShaderSource = `
     attribute vec4 position;
     attribute vec4 color;
@@ -28,17 +26,17 @@ const fragmentShaderSource = `
     }
 `;
 
-function generateTriangleGeometryData (
-    geometryType, 
-    width, 
-    height, 
-    segments, 
+function generateTriangleGeometryData(
+    geometryType,
+    width,
+    height,
+    segments,
     color = null
 ) {
     if (!color) color = vec4.fromValues(1.0, 1.0, 1.0, 1.0);
 
-    if(geometryType !== asr.geometryType().Triangles && 
-        geometryType !== asr.geometryType().Lines    &&
+    if (geometryType !== asr.geometryType().Triangles &&
+        geometryType !== asr.geometryType().Lines &&
         geometryType !== asr.geometryType().Points) {
         throw new Error("Geometry type is not correct.");
     }
@@ -55,9 +53,9 @@ function generateTriangleGeometryData (
         let shift = i * segmentLength * 0.5;
         for (let j = 0; j <= segments - i; ++j) {
             let x = j * segmentLength - (halfWidth - shift);
-            vertices.push(
-                asr.vertex(x, y, 0.0, 
-                           color[0], color[1], color[2], color[3])
+            vertices.push(asr.vertex(
+                x, y, 0.0,
+                color[0], color[1], color[2], color[3])
             );
 
             if (geometryType === asr.geometryType().Points) {
@@ -75,21 +73,21 @@ function generateTriangleGeometryData (
                 let indexA = (i * (segments + 1) + j) - shift;
                 let indexB = indexA + 1;
                 let indexC = (indexA + (segments + 1)) - i;
-                let indexD = (indexC + 1);
+                let indexD = indexC + 1;
 
                 let last = (segments - i) - 1;
-                if (geometryType == asr.geometryType().Lines) {
+                if (geometryType === asr.geometryType().Lines) {
                     indices.push(
-                            indexA, indexB, indexB, indexC, indexC, indexA
+                        indexA, indexB, indexB, indexC, indexC, indexA
                     );
-                    if(j != last) {
+                    if (j != last) {
                         indices.push(
-                                indexB, indexD, indexD, indexC, indexC, indexB
+                            indexB, indexD, indexD, indexC, indexC, indexB
                         );
                     }
                 } else {
-                    indices.push(indexA, indexC, indexB);
-                    if(j != last) {
+                    indices.push(indexA, indexB, indexC);
+                    if (j != last) {
                         indices.push(indexB, indexC, indexD);
                     }
                 }
@@ -115,39 +113,48 @@ function main() {
     asr.createShader(vertexShaderSource, fragmentShaderSource);
 
     asr.prepareForRendering();
-    asr.prepareForRenderingFrame();
     asr.setLineWidth(3);
 
     const width = 1.0, height = 1.0;
     const segments = 5;
-    const triangle = 
+
+    const triangle =
         generateTriangleGeometryData(
             asr.geometryType().Triangles, width, height, segments
         );
-    const triangles = asr.createGeometry(asr.geometryType().Triangles, triangle.triangleVertices, triangle.triangleIndices); 
+    const triangles = createGeometry(asr.geometryType().Triangles, triangle.triangleVertices, triangle.triangleIndices);
 
-    asr.setCurrentGeometry(triangles);
-    asr.renderCurrentGeometry();
 
     const edgeColor = vec4.fromValues(1.0, 0.7, 0.7, 1.0);
-    const edge = 
+    const edge =
         generateTriangleGeometryData(
             asr.geometryType().Lines, width, height, segments, edgeColor
         );
-    const lines = asr.createGeometry(asr.geometryType().Lines, edge.triangleVertices, edge.triangleIndices);
-
-    asr.setCurrentGeometry(lines);
-    asr.renderCurrentGeometry();
+    const lines = createGeometry(asr.geometryType().Lines, edge.triangleVertices, edge.triangleIndices);
 
     const vertexColor = vec4.fromValues(1.0, 0.0, 0.0, 1.0);
     const vertex =
-    generateTriangleGeometryData(
+        generateTriangleGeometryData(
             asr.geometryType().Points, width, height, segments, vertexColor
         );
-    const points = asr.createGeometry(asr.geometryType().Points, vertex.triangleVertices, vertex.triangleIndices);
+    const points = createGeometry(asr.geometryType().Points, vertex.triangleVertices, vertex.triangleIndices);
 
-    asr.setCurrentGeometry(points);
-    asr.renderCurrentGeometry();
+    function render() {
+        asr.prepareForRenderingFrame();
+
+        asr.setCurrentGeometry(triangles);
+        asr.renderCurrentGeometry();
+
+        asr.setCurrentGeometry(lines);
+        asr.renderCurrentGeometry();
+
+        asr.setCurrentGeometry(points);
+        asr.renderCurrentGeometry();
+
+        requestAnimationFrame(render);
+    }
+
+    render();
 }
 
 main();

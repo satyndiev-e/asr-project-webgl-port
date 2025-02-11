@@ -1,7 +1,5 @@
 "use strict";
 
-import * as asr from "./asr.js";
-
 const vertexShaderSource = `
     attribute vec4 position;
     attribute vec4 color;
@@ -28,17 +26,17 @@ const fragmentShaderSource = `
     }
 `;
 
-function generateSphereGeometryData (
-    geometryType, 
-    radius, 
+function generateSphereGeometryData(
+    geometryType,
+    radius,
     widthSegments,
-    heightSegments, 
+    heightSegments,
     color = null
 ) {
     if (!color) color = vec4.fromValues(1.0, 1.0, 1.0, 1.0);
 
-    if(geometryType !== asr.geometryType().Triangles && 
-        geometryType !== asr.geometryType().Lines    &&
+    if (geometryType !== asr.geometryType().Triangles &&
+        geometryType !== asr.geometryType().Lines &&
         geometryType !== asr.geometryType().Points) {
         throw new Error("Geometry type is not correct!");
     }
@@ -46,10 +44,10 @@ function generateSphereGeometryData (
     let vertices = [];
     let indices = [];
 
-    for(let i  = 0; i <= heightSegments; ++i) {
+    for (let i = 0; i <= heightSegments; ++i) {
         let v = i / heightSegments;
         let phi = v * asr.PI;
-        for(let j = 0; j <= widthSegments; ++j) {
+        for (let j = 0; j <= widthSegments; ++j) {
             let u = j / widthSegments;
             let theta = u * asr.TWO_PI;
 
@@ -73,14 +71,14 @@ function generateSphereGeometryData (
         }
     }
 
-    if(geometryType === asr.geometryType().Lines || geometryType === asr.geometryType().Triangles) {
-        for(let i = 0; i < heightSegments; ++i) {
-            for(let j = 0; j < widthSegments; ++j) {
+    if (geometryType === asr.geometryType().Lines || geometryType === asr.geometryType().Triangles) {
+        for (let i = 0; i < heightSegments; ++i) {
+            for (let j = 0; j < widthSegments; ++j) {
                 let indexA = i * (widthSegments + 1) + j;
                 let indexB = indexA + 1;
                 let indexC = indexA + (widthSegments + 1);
                 let indexD = indexC + 1;
-                if(geometryType === asr.geometryType().Lines) {
+                if (geometryType === asr.geometryType().Lines) {
                     indices.push(
                         indexA, indexB, indexB, indexC, indexC, indexA
                     );
@@ -109,9 +107,32 @@ function main() {
     asr.initializeWebGL();
     asr.createShader(vertexShaderSource, fragmentShaderSource);
 
+    const radius = 0.7;
+    const widthSegments = 20, heightSegments = 20;
+
+    const triangle =
+        generateSphereGeometryData(
+            asr.geometryType().Triangles, radius, widthSegments, heightSegments
+        );
+    const triangles = asr.createGeometry(asr.geometryType().Triangles, triangle.sphereVertices, triangle.sphereIndices);
+
+    const edgeColor = vec4.fromValues(1.0, 0.7, 0.7, 1.0);
+    const edge =
+        generateSphereGeometryData(
+            asr.geometryType().Lines, radius * 1.001, widthSegments, heightSegments, edgeColor
+        );
+    const lines = asr.createGeometry(asr.geometryType().Lines, edge.sphereVertices, edge.sphereIndices);
+
+    const vertexColor = vec4.fromValues(1.0, 0.0, 0.0, 1.0);
+    const vertex =
+        generateSphereGeometryData(
+            asr.geometryType().Points, radius * 1.01, widthSegments, heightSegments, vertexColor
+        );
+    const points = asr.createGeometry(asr.geometryType().Points, vertex.sphereVertices, vertex.sphereIndices);
+
     asr.prepareForRendering();
-    asr.enableFaceCulling();
     asr.enableDepthTest();
+    asr.enableFaceCulling();
     asr.setLineWidth(3);
 
     const CAMERA_SPEED = 0.01;
@@ -123,27 +144,30 @@ function main() {
     let cameraPosition = vec3.fromValues(1.4, 1.0, 1.5);
     let cameraRotation = vec3.fromValues(-0.5, 0.75, 0.0);
 
-    const bodyElement = document.querySelector("body");
+    const keys = asr.setKeysEventHandler();
 
-    bodyElement.addEventListener("keydown", keyDown, true);
-
-    function keyDown( event ) {
-        if ("w" === event.key) cameraRotation[0] += CAMERA_ROT_SPEED;
-        if ("a" === event.key) cameraRotation[1] += CAMERA_ROT_SPEED;
-        if ("s" === event.key) cameraRotation[0] -= CAMERA_ROT_SPEED;
-        if ("d" === event.key) cameraRotation[1] -= CAMERA_ROT_SPEED;
-
-        if ("ArrowUp" === event.key) {
+    function updateCamera() {
+        if (keys.isKeyPressed("w")) cameraRotation[0] += CAMERA_ROT_SPEED;
+        if (keys.isKeyPressed("a")) cameraRotation[1] += CAMERA_ROT_SPEED;
+        if (keys.isKeyPressed("s")) cameraRotation[0] -= CAMERA_ROT_SPEED;
+        if (keys.isKeyPressed("d")) cameraRotation[1] -= CAMERA_ROT_SPEED;
+    
+        if (keys.isKeyPressed("ArrowUp")) {
             let move = vec3.fromValues(0.0, 0.0, 1.0);
             vec3.transformMat4(move, move, asr.getViewMatrix());
             vec3.scaleAndAdd(cameraPosition, cameraPosition, move, -CAMERA_SPEED);
         }
-        if ("ArrowDown" === event.key) {
+        if (keys.isKeyPressed("ArrowDown")) {
             let move = vec3.fromValues(0.0, 0.0, 1.0);
             vec3.transformMat4(move, move, asr.getViewMatrix());
             vec3.scaleAndAdd(cameraPosition, cameraPosition, move, CAMERA_SPEED);
         }
+
+        requestAnimationFrame(updateCamera);
     }
+
+    updateCamera();
+
     asr.setMatrix(asr.setMatrixMode(asr.matrixMode().Projection));
     asr.loadPerspectiveProjectionMatrix(CAMERA_FOV, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
 
@@ -154,33 +178,11 @@ function main() {
         asr.translateMatrix(cameraPosition);
         asr.rotateMatrix(cameraRotation);
 
-        const radius = 0.7;
-        const widthSegments = 20, heightSegments = 20;
-        const triangle = 
-            generateSphereGeometryData(
-                asr.geometryType().Triangles, radius, widthSegments, heightSegments
-            );
-        const triangles = asr.createGeometry(asr.geometryType().Triangles, triangle.sphereVertices, triangle.sphereIndices); 
-
         asr.setCurrentGeometry(triangles);
         asr.renderCurrentGeometry();
 
-        const edgeColor = vec4.fromValues(1.0, 0.7, 0.7, 1.0);
-        const edge = 
-            generateSphereGeometryData(
-                asr.geometryType().Lines, radius * 1.001, widthSegments, heightSegments, edgeColor
-            );
-        const lines = asr.createGeometry(asr.geometryType().Lines, edge.sphereVertices, edge.sphereIndices);
-
         asr.setCurrentGeometry(lines);
         asr.renderCurrentGeometry();
-
-        const vertexColor = vec4.fromValues(1.0, 0.0, 0.0, 1.0);
-        const vertex =
-        generateSphereGeometryData(
-                asr.geometryType().Points, radius * 1.01, widthSegments, heightSegments, vertexColor
-            );
-        const points = asr.createGeometry(asr.geometryType().Points, vertex.sphereVertices, vertex.sphereIndices);
 
         asr.setCurrentGeometry(points);
         asr.renderCurrentGeometry();
