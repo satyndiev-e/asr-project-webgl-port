@@ -178,6 +178,7 @@ const fragmentShaderSource = `
 
         if (textureEnabled) {
             vec4 texelColor = texture2D(textureSampler, fragmentTextureCoordinates);
+
             if (texturingMode == TEXTURING_MODE_ADDITION) {
                 gl_FragColor.rgb += texelColor.rgb;
                 gl_FragColor.a = min(gl_FragColor.a + texelColor.a, 1.0);

@@ -47,7 +47,7 @@ const fragmentShaderSource = `
     varying vec2 fragmentTextureCoordinates;
 
     void main() {
-        vec4 outputColor = vec4(0.0);
+        vec4 outputColor = fragmentColor;
 
         if (textureEnabled) {
             vec4 texelColor = texture2D(textureSampler, fragmentTextureCoordinates);
@@ -60,7 +60,7 @@ const fragmentShaderSource = `
             } else if (texturingMode == TEXTURING_MODE_REVERSE_SUBTRACTION) {
                 outputColor.rgb = max(texelColor.rgb - outputColor.rgb, 0.0);
             } else if (texturingMode == TEXTURING_MODE_MODULATION) {
-                outputColor = texelColor * fragmentColor;
+                outputColor *= texelColor;
             } else if (texturingMode == TEXTURING_MODE_DECALING) {
                 outputColor.rgb = mix(outputColor.rgb, texelColor.rgb, texelColor.a);
             }

@@ -59,8 +59,6 @@ const fragmentShaderSource = `
             } else if (texturingMode == TEXTURING_MODE_DECALING) {
                 outputColor.rgb = mix(outputColor.rgb, texelColor.rgb, texelColor.a);
             }
-
-            outputColor = vec4(texelColor.rgb, fragmentColor.a);
         }
 
         gl_FragColor = outputColor;
