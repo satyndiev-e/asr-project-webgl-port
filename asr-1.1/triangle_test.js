@@ -109,7 +109,7 @@ function generateTriangleGeometryData(
 
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
     asr.createShader(vertexShaderSource, fragmentShaderSource);
 
     asr.prepareForRendering();

@@ -95,7 +95,7 @@ function generateCircleGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
     asr.createShader(vertexShaderSource, fragmentShaderSource);
 
     const radius = 0.5

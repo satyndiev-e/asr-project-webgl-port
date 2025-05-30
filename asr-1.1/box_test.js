@@ -199,7 +199,7 @@ function generateBoxGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500);  // Width, Hieght
     asr.createShader(vertexShaderSource, fragmentShaderSource);
 
     const width = 1.0, height = 1.0, depth = 1.0;
@@ -211,7 +211,7 @@ function main() {
         );
     const triangles = asr.createGeometry(asr.geometryType().Triangles, triangle.boxVertices, triangle.boxIndices);
 
-    const edgeColor = vec4.fromValues(1.0, 0.7, 0.7, 1.0);
+    let edgeColor = vec4.fromValues(1.0, 0.7, 0.7, 1.0);
     const edge =
         generateBoxGeometryData(
             asr.geometryType().Lines, width, height, depth, widthSegments, heightSegments, depthSegments, edgeColor
@@ -263,12 +263,12 @@ function main() {
 
     updateCamera();
 
-    asr.setMatrix(asr.setMatrixMode(asr.matrixMode().Projection));
+    asr.setMatrixMode(asr.matrixMode().Projection);
     asr.loadPerspectiveProjectionMatrix(CAMERA_FOV, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
 
     function render() {
         asr.prepareForRenderingFrame();
-        asr.setMatrix(asr.setMatrixMode(asr.matrixMode().View));
+        asr.setMatrixMode(asr.matrixMode().View);
         asr.loadIdentityMatrix();
         asr.translateMatrix(cameraPosition);
         asr.rotateMatrix(cameraRotation);

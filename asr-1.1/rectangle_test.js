@@ -100,7 +100,7 @@ function generateRectangleGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
     asr.createShader(vertexShaderSource, fragmentShaderSource);
 
     const width = 1.0, height = 1.0;

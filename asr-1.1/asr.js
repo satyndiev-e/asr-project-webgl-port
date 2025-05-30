@@ -3,6 +3,7 @@
  */
 
 let gl = null;
+let canvasToDisplaySizeMap = null;
 
 /**
  * Common Constants
@@ -82,7 +83,7 @@ let renderingStartTime = null;
  * Initialize WebGL
  */
 
-function initializeWebGL() {
+function initializeWebGL(canvasWidth = null, canvasHeight = null) {
     const canvas = document.getElementById("webgl-canvas");
     gl = canvas.getContext("webgl");
 
@@ -90,8 +91,64 @@ function initializeWebGL() {
         console.error("Failed to initialize the WebGL loader.");
         return;
     }
+
+    let screenWidth = canvasWidth !== null ? canvasWidth : window.innerWidth;
+    let screenHeight = canvasHeight !== null ? canvasHeight : window.innerHeight;
+
+    canvasToDisplaySizeMap = new Map([[canvas, [screenWidth, screenHeight]]]);
+    
+    function onResize(entries) {
+        for (const entry of entries) {
+            let width;
+            let height;
+            let dpr = window.devicePixelRatio;
+            if (entry.devicePixelContentBoxSize) {
+                width = entry.devicePixelContentBoxSize[0].inlineSize;
+                height = entry.devicePixelContentBoxSize[0].blockSize;
+                dpr = 1;
+            } else if (entry.contentBoxSize) {
+                if (entry.contentBoxSize[0]) {
+                    width = entry.contentBoxSize[0].inlineSize;
+                    height = entry.contentBoxSize[0].blockSize;
+                } else {
+                    width = entry.contentBoxSize.inlineSize;
+                    height = entry.contentBoxSize.blockSize;
+                }
+            } else {
+                width = entry.contentRect.width;
+                height = entry.contentRect.height;
+            }
+            const displayWidth = Math.round(width * dpr);
+            const displayHeight = Math.round(height * dpr);
+            canvasToDisplaySizeMap.set(entry.target, [displayWidth, displayHeight]);
+        }
+    }
+
+    const resizeObserver = new ResizeObserver(onResize);
+    resizeObserver.observe(canvas, { box: 'content-box' });
+
     return true;
 }
+
+
+/**
+ * Resize Canvas' size
+ */
+
+function resizeCanvasToDisplaySize(canvas) {
+    const [displayWidth, displayHeight] = canvasToDisplaySizeMap.get(canvas);
+
+    const needResize = canvas.width !== displayWidth ||
+        canvas.height !== displayHeight;
+
+    if (needResize) {
+        canvas.width = displayWidth;
+        canvas.height = displayHeight;
+    }
+
+    return needResize;
+}
+
 
 /**
  * Keyboard Handler
@@ -281,7 +338,7 @@ function loadOrthographicProjectionMatrix(zoom, nearPlane, farPlane) {
 }
 
 function loadPerspectiveProjectionMatrix(fieldOfView, nearPlane, farPlane) {
-    const aspectRatio = gl.canvas.clientWidth / gl.canvas.clientHeight;;
+    const aspectRatio = gl.canvas.clientWidth / gl.canvas.clientHeight;
 
     const perspectiveMatrix = mat4.create();
     mat4.perspective(perspectiveMatrix, fieldOfView, aspectRatio, nearPlane, farPlane);
@@ -340,7 +397,8 @@ function disableDepthTest() {
 
 function prepareForRendering() {
     gl.clearColor(0, 0, 0, 0);
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    resizeCanvasToDisplaySize(gl.canvas);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     while (modelMatrixStack.length > 0) modelMatrixStack.pop();
     modelMatrixStack.push(mat4.create());

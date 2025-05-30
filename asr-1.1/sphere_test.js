@@ -104,7 +104,7 @@ function generateSphereGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
     asr.createShader(vertexShaderSource, fragmentShaderSource);
 
     const radius = 0.7;
@@ -168,12 +168,12 @@ function main() {
 
     updateCamera();
 
-    asr.setMatrix(asr.setMatrixMode(asr.matrixMode().Projection));
+    asr.setMatrixMode(asr.matrixMode().Projection);
     asr.loadPerspectiveProjectionMatrix(CAMERA_FOV, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
 
     function render() {
         asr.prepareForRenderingFrame();
-        asr.setMatrix(asr.setMatrixMode(asr.matrixMode().View));
+        asr.setMatrixMode(asr.matrixMode().View);
         asr.loadIdentityMatrix();
         asr.translateMatrix(cameraPosition);
         asr.rotateMatrix(cameraRotation);
