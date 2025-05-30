@@ -43,7 +43,7 @@ const triangleGeometryVertices = new Float32Array(
 const triangleGeometryIndices = new Uint16Array([0, 1, 2]);
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
     asr.createShader(vertexShaderSource, fragmentShaderSource);
     const triangle = asr.createGeometry(asr.geometryType().Triangles, triangleGeometryVertices, triangleGeometryIndices);
     asr.prepareForRendering();

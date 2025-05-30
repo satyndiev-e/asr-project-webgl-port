@@ -28,12 +28,6 @@ const vertexShaderSource = `
 const fragmentShaderSource = `
     precision mediump float;
 
-    #define TEXTURING_MODE_ADDITION            0
-    #define TEXTURING_MODE_SUBTRACTION         1
-    #define TEXTURING_MODE_REVERSE_SUBTRACTION 2
-    #define TEXTURING_MODE_MODULATION          3
-    #define TEXTURING_MODE_DECALING            4
-
     uniform bool textureEnabled;
     uniform int texturingMode;
     uniform sampler2D textureSampler;
@@ -42,28 +36,12 @@ const fragmentShaderSource = `
     varying vec2 fragmentTextureCoordinates;
 
     void main() {
-        vec4 outputColor = fragmentColor;
+        gl_FragColor = fragmentColor;
 
-        if (textureEnabled) {
+       if (textureEnabled) {
             vec4 texelColor = texture2D(textureSampler, fragmentTextureCoordinates);
-
-            if (texturingMode == TEXTURING_MODE_ADDITION) {
-                outputColor.rgb += texelColor.rgb;
-                outputColor.a = min(outputColor.a + texelColor.a, 1.0);
-            } else if (texturingMode == TEXTURING_MODE_SUBTRACTION) {
-                outputColor.rgb = max(outputColor.rgb - texelColor.rgb, 0.0);
-            } else if (texturingMode == TEXTURING_MODE_REVERSE_SUBTRACTION) {
-                outputColor.rgb = max(texelColor.rgb - outputColor.rgb, 0.0);
-            } else if (texturingMode == TEXTURING_MODE_MODULATION) {
-                outputColor *= texelColor;
-            } else if (texturingMode == TEXTURING_MODE_DECALING) {
-                outputColor.rgb = mix(outputColor.rgb, texelColor.rgb, texelColor.a);
-            }
-
-            outputColor = vec4(texelColor.rgb, fragmentColor.a);
+            gl_FragColor = vec4(texelColor.rgb, texelColor.a);
         }
-
-        gl_FragColor = outputColor;
     }
 `;
 
@@ -136,7 +114,7 @@ function generateRingGeometryData(
                     indexB, indexD, indexD, indexC, indexC, indexB
                 );
             } else {
-                indices.push(indexA, indexC, indexB);
+                indices.push(indexA, indexB, indexC);
                 indices.push(indexB, indexC, indexD);
             }
         }
@@ -154,7 +132,7 @@ function generateRingGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
     asr.createShader(vertexShaderSource, fragmentShaderSource);
 
     const radius1 = 0.5, radius2 = 0.7;
@@ -189,6 +167,7 @@ function main() {
         asr.prepareForRenderingFrame();
 
         asr.setTextureCurrent(texture);
+        asr.setTextureMode(asr.texturingMode().Modulation);
         asr.setCurrentGeometry(triangles);
         asr.renderCurrentGeometry();
 
