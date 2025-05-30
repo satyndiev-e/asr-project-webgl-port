@@ -154,7 +154,7 @@ function generateRingGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
     const material = asr.createMaterial(vertexShaderSource, fragmentShaderSource);
 
     const radius1 = 0.5, radius2 = 0.7;

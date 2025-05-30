@@ -124,7 +124,7 @@ const quadGeometryVertices = new Float32Array(
 const quadGeometryIndices = new Uint16Array([0, 1, 2, 1, 3, 2]);
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
 
     const material = asr.createMaterial(vertexShaderSource, fragmentShaderSource);
     const geometry = asr.createGeometry(asr.geometryType().Triangles, quadGeometryVertices, quadGeometryIndices);

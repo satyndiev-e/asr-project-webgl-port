@@ -269,7 +269,7 @@ function generateBoxGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
     const material = asr.createMaterial(vertexShaderSource, fragmentShaderSource);
 
     const width = 1.0, height = 1.0, depth = 1.0;
@@ -337,13 +337,13 @@ function main() {
 
     updateCamera();
 
-    asr.setMatrix(asr.setMatrixMode(asr.matrixMode().Projection));
+    asr.setMatrixMode(asr.matrixMode().Projection);
     asr.loadPerspectiveProjectionMatrix(CAMERA_FOV, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
 
     function render() {
         asr.prepareForRenderingFrame();
 
-        asr.setMatrix(asr.setMatrixMode(asr.matrixMode().View));
+        asr.setMatrixMode(asr.matrixMode().View);
         asr.loadIdentityMatrix();
         asr.translateMatrix(cameraPosition);
         asr.rotateMatrix(cameraRotation);

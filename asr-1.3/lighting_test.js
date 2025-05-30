@@ -361,7 +361,7 @@ function generateSphereGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
 
     // Material
 
@@ -491,7 +491,8 @@ asr.setMaterialParameter("texturingMode", 0);
         requestAnimationFrame(updateCamera);
     }
     updateCamera();
-    asr.setMatrix(asr.setMatrixMode(asr.matrixMode().Projection));
+
+    asr.setMatrixMode(asr.matrixMode().Projection);
     asr.loadPerspectiveProjectionMatrix(CAMERA_FOV, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
 
     // Plane Parameters

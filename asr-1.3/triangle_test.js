@@ -150,7 +150,7 @@ function generateTriangleGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
 
     const material = asr.createMaterial(vertexShaderSource, fragmentShaderSource);
 

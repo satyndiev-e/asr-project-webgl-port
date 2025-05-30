@@ -145,7 +145,7 @@ function generateRectangleGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
 
     const material = asr.createMaterial(vertexShaderSource, fragmentShaderSource);
 
@@ -173,8 +173,6 @@ function main() {
     const CAMERA_FOV = 1.3;
     const CAMERA_NEAR_PLANE = 0.1;
     const CAMERA_FAR_PLANE = 10000;
-
-    // asr.setTextureMode(3);
 
     let cameraPosition = vec3.fromValues(-16.5, 52.5, -16.5);
     let cameraRotation = vec3.fromValues(-0.65, -2.36, 0.0);
@@ -204,7 +202,7 @@ function main() {
 
     updateCamera();
 
-    asr.setMatrix(asr.setMatrixMode(asr.matrixMode().Projection));
+    asr.setMatrixMode(asr.matrixMode().Projection);
     asr.loadPerspectiveProjectionMatrix(CAMERA_FOV, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
 
     function render() {

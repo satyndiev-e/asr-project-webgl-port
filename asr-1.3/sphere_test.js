@@ -155,7 +155,8 @@ function generateSphereGeometryData(
 }
 
 function main() {
-    asr.initializeWebGL();
+    asr.initializeWebGL(500, 500); // Width, Height
+
     const meterial = asr.createMaterial(vertexShaderSource, fragmentShaderSource);
 
     const radius = 0.5;
@@ -224,7 +225,7 @@ function main() {
 
     updateCamera();
 
-    asr.setMatrix(asr.setMatrixMode(asr.matrixMode().Projection));
+    asr.setMatrixMode(asr.matrixMode().Projection);
     asr.loadPerspectiveProjectionMatrix(CAMERA_FOV, CAMERA_NEAR_PLANE, CAMERA_FAR_PLANE);
 
     function render() {
