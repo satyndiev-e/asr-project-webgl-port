@@ -33,7 +33,7 @@ ASR (AUCA Simple Renderer) is a step-by-step graphics engine that introduces fun
   - Demonstrates practical application of all engine features
 
 ## Dependencies
-**gl-matrix**: Vector and matrix math library loaded from Cloudflare CDN
+**gl-matrix**: Vector and matrix math library loaded from Cloudflare CDN<br/>
 **Modern Web Browser**: Chrome, Firefox, Safari, or Edge with WebGL support
 
 ## Setup and Usage
@@ -46,7 +46,7 @@ ASR (AUCA Simple Renderer) is a step-by-step graphics engine that introduces fun
 
 ### Version 2.0
   1. Clone the repository to your local environment
-  2. Install 'Live Server' from Extensions if you are using VS Code. <br/>For other editors, you'll need to run a local server (e.g., npm install -g http-server, then run http-server in your project directory).
+  2. Install 'Live Server' from Extensions if you are using VS Code.<br/> For other editors, you'll need to run a local server (e.g., npm install -g http-server, then run http-server in your project directory).
   3. Run the HTML file
 <img width="1425" height="796" alt="Screenshot 2025-09-04 at 21 02 27" src="https://github.com/user-attachments/assets/279dc9a5-b044-4933-81ac-de269a8f31a9" />
 
